@@ -17,13 +17,42 @@ async function run() {
     await client.connect();
     const database = client.db("nicheProductsWebsite");
     const productCollection = database.collection("products");
+    const usersCollection = database.collection("users");
     // create a document to insert
 
     app.get('/products', async(req, res)=>{
-      const cursor = productCollection.find({}).limit(6);
+      const query = req.query.home;
+      let cursor ;
+      if(query){
+
+        cursor = productCollection.find({}).limit(6);
+      }
+      else{
+        cursor = productCollection.find({});
+      }
       const result = await cursor.toArray();
       res.json(result);
     });
+
+    // POST Api
+    app.post('/users', async(req, res)=> {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      console.log(result);
+      res.json(result);
+    });
+
+    app.put('/users', async(req, res)=>{
+      const user = req.body;
+      const filter = {email : user.email};
+      const options = {upsert: true};
+
+      const updateDoc = {
+        $set: user
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc, options);
+      res.json(result);
+    })
 
   } finally {
     // await client.close();
