@@ -4,6 +4,7 @@ const cors = require('cors')
 const { MongoClient } = require('mongodb');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
+const ObjectId = require('mongodb').ObjectId;
 
 //Middleware
 app.use(cors());
@@ -111,7 +112,34 @@ async function run() {
       const updateDoc = { $set: { role: 'admin' } };
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.json(result);
-    })
+    });
+
+    app.put('/myOrders/approve/:id', async (req, res) => {
+      const id = req.params.id;
+      const status = req.body.status;
+      console.log(status, id);
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = { $set: { status: status } };
+      const result = await ordersCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    });
+
+    // Delete Api
+    app.delete('/myOrders/:id', async (req, res) =>{
+      const user = req.params.id;
+      const query = { _id: ObjectId(user) };
+      const result = await ordersCollection.deleteOne(query);
+      res.json(result);
+    });
+    app.delete('/products/:id', async (req, res) =>{
+      const user = req.params.id;
+      const query = { _id: ObjectId(user) };
+      const result = await productCollection.deleteOne(query);
+      res.json(result);
+    });
+
+
+
 
   } finally {
     // await client.close();
