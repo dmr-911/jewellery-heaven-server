@@ -21,49 +21,71 @@ async function run() {
     const ordersCollection = database.collection("orders");
     // create a document to insert
 
-    app.get('/products', async(req, res)=>{
+    // GET Api
+    app.get('/products', async (req, res) => {
       const query = req.query.home;
-      let cursor ;
-      if(query){
+      let cursor;
+      if (query) {
 
         cursor = productCollection.find({}).limit(6);
       }
-      else{
+      else {
         cursor = productCollection.find({});
       }
       const result = await cursor.toArray();
       res.json(result);
     });
 
-    app.get('/users/:email', async(req, res)=>{
+    app.get('/users/:email', async (req, res) => {
       const email = req.params.email;
-      const query = {email : email};
+      const query = { email: email };
       const user = await usersCollection.findOne(query);
       let isAdmin = false;
-      if(user?.role === 'admin'){
-        isAdmin= true;
+      if (user?.role === 'admin') {
+        isAdmin = true;
       }
-      res.json({admin : isAdmin});
+      res.json({ admin: isAdmin });
     });
 
+    app.get('/orders', async (req, res) => {
+      const email = req.query.email;
+      let cursor;
+      if (email) {
+        cursor = ordersCollection.find({ email: email })
+      }
+      else {
+        cursor = ordersCollection.find({});
+      }
+      const result = await cursor.toArray();
+      res.json(result);
+    })
+
+
     // POST Api
-    app.post('/users', async(req, res)=> {
+    app.post('/products', async(req, res)=>{
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.json(result);
+    });
+
+    app.post('/users', async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
       res.json(result);
     });
-    app.post('/orders', async(req, res)=>{
+    app.post('/orders', async (req, res) => {
       const order = req.body;
-      console.log(order);
-      const result  = await ordersCollection.insertOne(order);
+      const result = await ordersCollection.insertOne(order);
+      console.log(result);
       res.json(result);
-    })
+    });
+
 
     // PUT Api
-    app.put('/users', async(req, res)=>{
+    app.put('/users', async (req, res) => {
       const user = req.body;
-      const filter = {email : user.email};
-      const options = {upsert: true};
+      const filter = { email: user.email };
+      const options = { upsert: true };
 
       const updateDoc = {
         $set: user
@@ -72,10 +94,10 @@ async function run() {
       res.json(result);
     });
 
-    app.put('/users/admin', async(req, res)=>{
+    app.put('/users/admin', async (req, res) => {
       const user = req.body;
-      const filter = {email : user.email};
-      const updateDoc = {$set: {role: 'admin'}};
+      const filter = { email: user.email };
+      const updateDoc = { $set: { role: 'admin' } };
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.json(result);
     })
