@@ -19,6 +19,7 @@ async function run() {
     const productCollection = database.collection("products");
     const usersCollection = database.collection("users");
     const ordersCollection = database.collection("orders");
+    const reviewsCollection = database.collection("reviews");
     // create a document to insert
 
     // GET Api
@@ -58,6 +59,12 @@ async function run() {
       }
       const result = await cursor.toArray();
       res.json(result);
+    });
+
+    app.get('/reviews', async(req, res)=>{
+      const cursor = reviewsCollection.find({});
+      const result = await cursor.toArray();
+      res.json(result);
     })
 
 
@@ -76,9 +83,13 @@ async function run() {
     app.post('/orders', async (req, res) => {
       const order = req.body;
       const result = await ordersCollection.insertOne(order);
-      console.log(result);
       res.json(result);
     });
+    app.post('/reviews', async (req, res)=>{
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
+      res.json(result);
+    })
 
 
     // PUT Api
